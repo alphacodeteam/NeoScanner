@@ -4,9 +4,6 @@ import android.content.Context;
 import android.content.pm.PackageManager;
 import android.hardware.Camera;
 import android.util.Log;
-import android.widget.FrameLayout;
-
-import es.upv.alphacodeteam.neoscanner.R;
 
 public class CameraManager {
 
@@ -14,7 +11,7 @@ public class CameraManager {
     private CameraPreview mPreview;
 
     public CameraManager(Context c) {
-        if(checkCameraHardware(c)) {
+        if (checkCameraHardware(c)) {
 
             // Create an instance of Camera
             mCamera = getCameraInstance();
@@ -28,9 +25,11 @@ public class CameraManager {
      * Camera utils. Moving it nicely.
      **/
 
-    /** Check if this device has a camera */
+    /**
+     * Check if this device has a camera
+     */
     private boolean checkCameraHardware(Context context) {
-        if (context.getPackageManager().hasSystemFeature(PackageManager.FEATURE_CAMERA)){
+        if (context.getPackageManager().hasSystemFeature(PackageManager.FEATURE_CAMERA)) {
             Log.d("TAG", "Tiene camara!");
             return true;
         } else {
@@ -39,13 +38,14 @@ public class CameraManager {
         }
     }
 
-    /** A safe way to get an instance of the Camera object. */
-    public static Camera getCameraInstance(){
+    /**
+     * A safe way to get an instance of the Camera object.
+     */
+    public static Camera getCameraInstance() {
         Camera c = null;
         try {
             c = Camera.open(0); // attempt to get a Camera instance
-        }
-        catch (Exception e){
+        } catch (Exception e) {
             Log.d("TAG", "getCameraInstance: Not Working - " + e);
         }
         return c; // returns null if camera is unavailable
