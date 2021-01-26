@@ -62,6 +62,8 @@ public class MainActivity extends AppCompatActivity implements Selectable {
             switch (position) {
                 case 0:
                     // AQUÍ ABRIR CÁMARA, UNA VEZ OBTENIDA LA FOTO, SE ABRIRÁ EN LA NUEVA ACTIVITY (ImageActivity) para su procesado
+                    Intent i = new Intent(this, CameraActivity.class);
+                    startActivity(i);
                     break;
                 case 1:
                     // AQUÍ ABRIR EXPLORADOR DE ARCHIVOS (galeria), UNA VEZ SELECCIONADA LA FOTO, SE ABRIRÁ EN LA NUEVA ACTIVITY (ImageActivity) para su procesado
