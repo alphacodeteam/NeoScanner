@@ -10,6 +10,7 @@ import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 
@@ -93,6 +94,7 @@ public class MainActivity extends AppCompatActivity implements Selectable {
                     break;
                 case Image.GALLERY_INTENT_CODE:
                     uriSelectedImage = data.getData();
+                    Log.d("URI Received: ", uriSelectedImage.toString());
                     break;
             }
             if (uriSelectedImage != null) {
@@ -102,4 +104,5 @@ public class MainActivity extends AppCompatActivity implements Selectable {
             }
         }
     }
+
 }

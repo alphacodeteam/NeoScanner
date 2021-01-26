@@ -2,7 +2,6 @@ package es.upv.alphacodeteam.neoscanner.view.activity;
 
 import android.os.Bundle;
 import android.view.SurfaceView;
-import android.widget.FrameLayout;
 
 import androidx.appcompat.app.AppCompatActivity;
 
@@ -12,15 +11,15 @@ import org.opencv.core.Mat;
 import org.opencv.imgproc.Imgproc;
 
 import es.upv.alphacodeteam.neoscanner.R;
-import es.upv.alphacodeteam.neoscanner.view.util.CameraManager;
 
-public class CameraActivity extends AppCompatActivity
-        implements CameraBridgeViewBase.CvCameraViewListener2 {
+public class CameraActivity extends AppCompatActivity implements CameraBridgeViewBase.CvCameraViewListener2 {
 
     private CameraBridgeViewBase cameraView = null;
     private static boolean initOpenCV = false;
 
-    static { initOpenCV = OpenCVLoader.initDebug(); }
+    static {
+        initOpenCV = OpenCVLoader.initDebug();
+    }
 
 
     @Override
@@ -39,7 +38,10 @@ public class CameraActivity extends AppCompatActivity
     protected void onResume() {
         super.onResume();
 
-        if (initOpenCV) { cameraView.enableView(); }
+        if (initOpenCV) {
+            cameraView.enableView();
+        }
+
     }
 
     @Override
@@ -54,10 +56,13 @@ public class CameraActivity extends AppCompatActivity
     }
 
     @Override
-    public void onCameraViewStarted(int width, int height) { }
+    public void onCameraViewStarted(int width, int height) {
+    }
 
     @Override
-    public void onCameraViewStopped() { }
+    public void onCameraViewStopped() {
+    }
+
     @Override
     public Mat onCameraFrame(CameraBridgeViewBase.CvCameraViewFrame inputFrame) {
 
