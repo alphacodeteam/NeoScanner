@@ -20,8 +20,6 @@ import es.upv.alphacodeteam.neoscanner.view.util.Selectable;
 
 public class MainActivity extends AppCompatActivity implements Selectable {
 
-    private int originActionImage;
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -86,21 +84,25 @@ public class MainActivity extends AppCompatActivity implements Selectable {
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        Uri uriSelectedImage = null;
         if (resultCode == Image.RESULT_OK) {
+            Uri uriSelectedImage = null;
+            int origin = -1;
             switch (requestCode) {
                 case Image.CAMERA_INTENT_CODE:
                     // TODO: Obtenemos la uri guardada del viewmodel para obtener la imagen capturada
+                    origin = Image.CAMERA_INTENT_CODE;
                     break;
                 case Image.GALLERY_INTENT_CODE:
                     uriSelectedImage = data.getData();
-                    Log.d("URI Received: ", uriSelectedImage.toString());
+                    origin = Image.GALLERY_INTENT_CODE;
                     break;
             }
-            if (uriSelectedImage != null) {
-                // Guardamos el tipo de origen (Cámara o Galeria)
-                this.originActionImage = requestCode;
-                // TODO: Obtenemos la imagen desde uriSelectedImage
+            if (uriSelectedImage != null && origin != -1) {
+                // Llamamos al ImageActivity
+                Intent intent = new Intent(MainActivity.this, ImageActivity.class);
+                intent.putExtra("origin", origin);
+                intent.putExtra("uri", uriSelectedImage);
+                startActivity(intent);
             }
         }
     }

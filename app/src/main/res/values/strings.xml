@@ -7,4 +7,6 @@
         <item>Cámara</item>
         <item>Galería</item>
     </string-array>
+    <!-- ERRORS -->
+    <string name="title_error_occurred">Ha ocurrido un error</string>
 </resources>
