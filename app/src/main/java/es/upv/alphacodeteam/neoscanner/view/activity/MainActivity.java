@@ -156,11 +156,10 @@ public class MainActivity extends AppCompatActivity implements Selectable {
                 this.originActionImage = requestCode;
                 // TODO: Obtenemos la imagen desde uriSelectedImage
             } else if(imageCaptured != null){
-
                 mBitmap = imageCaptured;
                 mSelectionImageView.setImageBitmap(mBitmap);
-                List<PointF> points = Image.findPoints(mBitmap);
-                mSelectionImageView.setPoints(points);
+                //List<PointF> points = Image.findPoints(mBitmap);
+                //mSelectionImageView.setPoints(points);
                // calculateActivity(imageCaptured);
         }
 
