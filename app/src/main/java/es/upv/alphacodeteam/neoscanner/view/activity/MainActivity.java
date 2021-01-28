@@ -198,7 +198,7 @@ public class MainActivity extends AppCompatActivity implements Selectable {
             Mat transformed = Image.perspectiveTransform(orig, points);
             mResult = Image.applyThreshold(transformed);
 
-            ((ImageView) findViewById(R.id.imageView)).setImageBitmap(mResult);
+            mSelectionImageView.setImageBitmap(mResult);
 
             orig.release();
             transformed.release();
