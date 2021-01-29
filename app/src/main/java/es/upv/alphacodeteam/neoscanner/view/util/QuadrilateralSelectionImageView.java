@@ -180,15 +180,15 @@ public class QuadrilateralSelectionImageView extends androidx.appcompat.widget.A
 
     /**
      * Helper to map a given PointF to a given Matrix
-     *
+     * <p>
      * NOTE: http://stackoverflow.com/questions/19958256/custom-imageview-imagematrix-mappoints-and-invert-inaccurate
      *
-     * @param point The point to map
+     * @param point  The point to map
      * @param matrix The matrix
      * @return The mapped point
      */
     private PointF mapPointToMatrix(PointF point, Matrix matrix) {
-        float[] points = new float[] { point.x, point.y };
+        float[] points = new float[]{point.x, point.y};
         matrix.mapPoints(points);
         if (points.length > 1) {
             return new PointF(points[0], points[1]);
@@ -216,7 +216,7 @@ public class QuadrilateralSelectionImageView extends androidx.appcompat.widget.A
      * Set the points in order to control where the selection will be drawn.  The points should
      * be represented in regards to the image, not the view.  This method will translate from image
      * coordinates to view coordinates.
-     *
+     * <p>
      * NOTE: Calling this method will invalidate the view
      *
      * @param points A list of points. Passing null will set the selector to the default selection.
@@ -236,7 +236,7 @@ public class QuadrilateralSelectionImageView extends androidx.appcompat.widget.A
 
     /**
      * Gets the coordinates representing a rectangles corners.
-     *
+     * <p>
      * The order of the points is
      * 0------->1
      * ^        |
@@ -247,7 +247,7 @@ public class QuadrilateralSelectionImageView extends androidx.appcompat.widget.A
      * @return An array of 8 floats
      */
     private float[] getCornersFromRect(RectF rect) {
-        return new float[] {
+        return new float[]{
                 rect.left, rect.top,
                 rect.right, rect.top,
                 rect.right, rect.bottom,
@@ -303,9 +303,11 @@ public class QuadrilateralSelectionImageView extends androidx.appcompat.widget.A
             return true;
         }
     }
+
     private PointF subtractPoints(PointF p1, PointF p2) {
         return new PointF(p1.x - p2.x, p1.y - p2.y);
     }
+
     private float crossProduct(PointF v1, PointF v2) {
         return v1.x * v2.y - v1.y * v2.x;
     }

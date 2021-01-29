@@ -4,13 +4,7 @@ import android.app.Activity;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.PointF;
-import android.net.Uri;
-import android.os.Build;
-import android.os.Environment;
-import android.provider.MediaStore;
 import android.util.Log;
-import android.widget.ImageView;
-import android.widget.Toast;
 
 import org.opencv.android.Utils;
 import org.opencv.core.CvType;
@@ -28,7 +22,6 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
-import java.io.File;
 import java.io.FileOutputStream;
 
 import es.upv.alphacodeteam.neoscanner.model.repository.ResLocalRepo;
@@ -99,7 +92,7 @@ public class Image {
             result.add(new PointF(Double.valueOf(points[3].x).floatValue(), Double.valueOf(points[3].y).floatValue()));
             largest.release();
         } else {
-            Log.d("CALCULATEACTIVITY","No hay triangulo, creando uno base!");
+            Log.d("CALCULATEACTIVITY", "No hay triangulo, creando uno base!");
             result = new ArrayList<>();
             result.add(new PointF(Double.valueOf(100).floatValue(), Double.valueOf(200).floatValue()));
             result.add(new PointF(Double.valueOf(100).floatValue(), Double.valueOf(100).floatValue()));
@@ -158,7 +151,7 @@ public class Image {
             Imgproc.approxPolyDP(c, approx, Imgproc.arcLength(c, true) * 0.02, true);
             Log.d("CONTOUR", "A: " + approx.total());
             Log.d("CONTOUR", "ca: " + Imgproc.contourArea(contour));
-            if (approx.total()==4 && Imgproc.contourArea(contour) > 150) {
+            if (approx.total() == 4 && Imgproc.contourArea(contour) > 150) {
                 // the contour has 4 points, it's valid
                 largest = approx;
                 Log.d("CONTOUR", "premio");
@@ -172,7 +165,6 @@ public class Image {
 
     /**
      * Transforma la perspectiva
-     *
      */
     public static Mat perspectiveTransform(Mat src, List<PointF> points) {
         Point point1 = new Point(points.get(0).x, points.get(0).y);
@@ -185,14 +177,13 @@ public class Image {
 
     /**
      * Aplica el Threshold para dar la sensación de escaneado...
-     *
      */
     public static Bitmap applyThreshold(Mat src) {
         Imgproc.cvtColor(src, src, Imgproc.COLOR_BGR2GRAY);
 
         // Some other approaches
-//        Imgproc.adaptiveThreshold(src, src, 255, Imgproc.ADAPTIVE_THRESH_MEAN_C, Imgproc.THRESH_BINARY, 15, 15);
-//        Imgproc.threshold(src, src, 0, 255, Imgproc.THRESH_BINARY + Imgproc.THRESH_OTSU);
+        // Imgproc.adaptiveThreshold(src, src, 255, Imgproc.ADAPTIVE_THRESH_MEAN_C, Imgproc.THRESH_BINARY, 15, 15);
+        // Imgproc.threshold(src, src, 0, 255, Imgproc.THRESH_BINARY + Imgproc.THRESH_OTSU);
 
         Imgproc.GaussianBlur(src, src, new Size(5, 5), 0);
         Imgproc.adaptiveThreshold(src, src, 255, Imgproc.ADAPTIVE_THRESH_GAUSSIAN_C, Imgproc.THRESH_BINARY, 11, 2);
@@ -205,7 +196,7 @@ public class Image {
 
     /**
      * Ordena los puntos
-     *
+     * <p>
      * Sigue el siguiente flujo:
      * 0------->1
      * ^        |

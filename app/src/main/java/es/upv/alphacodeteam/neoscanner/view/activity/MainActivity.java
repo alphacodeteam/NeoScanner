@@ -40,6 +40,7 @@ import es.upv.alphacodeteam.neoscanner.R;
 import es.upv.alphacodeteam.neoscanner.view.util.Image;
 import es.upv.alphacodeteam.neoscanner.view.util.QuadrilateralSelectionImageView;
 import es.upv.alphacodeteam.neoscanner.view.util.Selectable;
+
 import org.opencv.android.Utils;
 
 import java.util.ArrayList;
@@ -58,13 +59,14 @@ import static org.opencv.imgproc.Imgproc.RETR_TREE;
 
 public class MainActivity extends AppCompatActivity implements Selectable {
 
-    private int originActionImage;
     private final int CAMERA_PERMISSION_CODE = 90;
+
     static {
         if (!OpenCVLoader.initDebug()) {
             // Handle initialization error
         }
     }
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -143,54 +145,44 @@ public class MainActivity extends AppCompatActivity implements Selectable {
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         if (resultCode == Image.RESULT_OK) {
-            Uri uriSelectedImage = null;
+            Bitmap imageCaptured = null;
+            Uri imageSelected = null;
             int origin = -1;
             switch (requestCode) {
                 case Image.CAMERA_INTENT_CODE:
-                    // TODO: Obtenemos la uri guardada del viewmodel para obtener la imagen capturada
+                    imageCaptured = (Bitmap) data.getExtras().get("data");
                     origin = Image.CAMERA_INTENT_CODE;
                     break;
                 case Image.GALLERY_INTENT_CODE:
-                    uriSelectedImage = data.getData();
+                    imageSelected = data.getData();
                     origin = Image.GALLERY_INTENT_CODE;
                     break;
             }
-            if (uriSelectedImage != null && origin != -1) {
-                // Llamamos al ImageActivity
-                Intent intent = new Intent(MainActivity.this, ImageActivity.class);
-                intent.putExtra("origin", origin);
-                intent.putExtra("uri", uriSelectedImage);
-                startActivity(intent);
+            if (origin != -1) {
+                if (imageCaptured != null) {
+                    // TODO: MARC
+                    // TODO: Supongo que esto de aquí abajo lo querrás pasar a ImageActivity, pasa imageCaptured con el putExtra como la uri de imageSelected
+                    // TODO: En ImageActivity te he dejado la variable privada global mBitmapReceived donde puedes guardar esta imageCaptured
+                    //mSelectionImageView.setImageBitmap(imageCaptured);
+                    //List<PointF> points = Image.findPoints(mBitmap);
+                    //mSelectionImageView.setPoints(points);
+                    // calculateActivity(imageCaptured);
+                } else if (imageSelected != null) {
+                    // Llamamos al ImageActivity
+                    Intent intent = new Intent(MainActivity.this, ImageActivity.class);
+                    intent.putExtra("origin", origin);
+                    intent.putExtra("uri", imageSelected);
+                    startActivity(intent);
+                }
             }
-        Uri uriSelectedImage = null;
-        Bitmap imageCaptured = null;
-
-        if(requestCode == Image.GALLERY_INTENT_CODE && resultCode == RESULT_OK)
-            uriSelectedImage = data.getData();
-
-        if (requestCode == Image.CAMERA_INTENT_CODE)
-            imageCaptured = (Bitmap) data.getExtras().get("data");
-
-            if (uriSelectedImage != null) {
-                // Guardamos el tipo de origen (Cámara o Galeria)
-                this.originActionImage = requestCode;
-                // TODO: Obtenemos la imagen desde uriSelectedImage
-            } else if(imageCaptured != null){
-                mBitmap = imageCaptured;
-                mSelectionImageView.setImageBitmap(mBitmap);
-                //List<PointF> points = Image.findPoints(mBitmap);
-                //mSelectionImageView.setPoints(points);
-               // calculateActivity(imageCaptured);
         }
-
     }
 
     @Override
     public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
         switch (requestCode) {
             case CAMERA_PERMISSION_CODE:
-                if (grantResults.length > 0 &&
-                        grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                     Image.startModeOfCamera(this);
                 } else {
                     Toast.makeText(this, "NeoScanner needs camera's permission", Toast.LENGTH_SHORT).show();
@@ -198,30 +190,4 @@ public class MainActivity extends AppCompatActivity implements Selectable {
                 return;
         }
     }
-
-    /**
-     * TODO: Estas lineas siguientes se moveran a la actividad de procesado de la imagen
-     */
-
-    Bitmap mBitmap;
-    Bitmap mResult;
-
-    private void calculateActivity(Bitmap original) {
-        mBitmap = original;
-        List<PointF> points = mSelectionImageView.getPoints();
-
-        if (mBitmap != null) {
-            Mat orig = new Mat();
-            org.opencv.android.Utils.bitmapToMat(mBitmap, orig);
-
-            Mat transformed = Image.perspectiveTransform(orig, points);
-            mResult = Image.applyThreshold(transformed);
-
-            mSelectionImageView.setImageBitmap(mResult);
-
-            orig.release();
-            transformed.release();
-        }
-    }
-
 }
