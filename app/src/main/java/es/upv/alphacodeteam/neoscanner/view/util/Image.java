@@ -4,7 +4,13 @@ import android.app.Activity;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.PointF;
+import android.net.Uri;
+import android.os.Bundle;
+import android.os.Environment;
+import android.provider.MediaStore;
 import android.util.Log;
+
+import androidx.core.content.FileProvider;
 
 import org.opencv.android.Utils;
 import org.opencv.core.CvType;
@@ -16,6 +22,7 @@ import org.opencv.core.Size;
 import org.opencv.imgproc.Imgproc;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -51,8 +58,12 @@ public class Image {
      *
      * @param activity
      */
-    public static void startModeOfCamera(final Activity activity) {
+    public static void startModeOfCamera(final Activity activity, File dir) {
         Intent cameraIntent = new Intent(android.provider.MediaStore.ACTION_IMAGE_CAPTURE);
+        Uri photoURI = FileProvider.getUriForFile(activity,
+                "com.example.android.fileprovider",
+                dir);
+        cameraIntent.putExtra(MediaStore.EXTRA_OUTPUT, photoURI);
         activity.startActivityForResult(cameraIntent, CAMERA_INTENT_CODE);
     }
 
@@ -85,14 +96,23 @@ public class Image {
 
         if (largest != null) {
             Point[] points = sortPoints(largest.toArray());
+            Point[] test = largest.toArray();
+            for (Point p: test) {
+                Log.d("LARGEST POINTS no compression", "x:" + p.x + " - y:" + p.y );
+            }
+            for (Point p: points) {
+                Log.d("LARGEST POINTS compressed ", "x:" + p.x + " - y:" + p.y );
+            }
             result = new ArrayList<>();
             result.add(new PointF(Double.valueOf(points[0].x).floatValue(), Double.valueOf(points[0].y).floatValue()));
             result.add(new PointF(Double.valueOf(points[1].x).floatValue(), Double.valueOf(points[1].y).floatValue()));
             result.add(new PointF(Double.valueOf(points[2].x).floatValue(), Double.valueOf(points[2].y).floatValue()));
             result.add(new PointF(Double.valueOf(points[3].x).floatValue(), Double.valueOf(points[3].y).floatValue()));
+
             largest.release();
+
         } else {
-            Log.d("CALCULATEACTIVITY", "No hay triangulo, creando uno base!");
+            Log.d("CALCULATEACTIVITY", "No hay cuadrado, creando uno base!");
             result = new ArrayList<>();
             result.add(new PointF(Double.valueOf(100).floatValue(), Double.valueOf(200).floatValue()));
             result.add(new PointF(Double.valueOf(100).floatValue(), Double.valueOf(100).floatValue()));
@@ -110,7 +130,7 @@ public class Image {
     /**
      * Detecta los bordes.
      */
-    private static Mat edgeDetection(Mat src) {
+    public static Mat edgeDetection(Mat src) {
         Mat edges = new Mat();
         Imgproc.cvtColor(src, edges, Imgproc.COLOR_BGR2GRAY);
         Imgproc.GaussianBlur(edges, edges, new Size(5, 5), 0);
@@ -138,19 +158,16 @@ public class Image {
         Log.d("CONTOUR", "C: " + contours.size());
 
         MatOfPoint2f largest = null;
-        /*
-        MatOfPoint2f temp = new MatOfPoint2f();
-        contours.get(1).convertTo(temp, CvType.CV_32FC2);
-        Imgproc.approxPolyDP(temp, largest, Imgproc.arcLength(temp, true) * 0.02, true);
-         */
+
         Log.d("CONTOUR", "A");
         for (MatOfPoint contour : contours) {
             MatOfPoint2f approx = new MatOfPoint2f();
             MatOfPoint2f c = new MatOfPoint2f();
-            contour.convertTo(c, CvType.CV_32FC2);
+            contour.convertTo(c, CvType.CV_32F);
+            Log.d("CONTOUR", "C = " + c.total());
             Imgproc.approxPolyDP(c, approx, Imgproc.arcLength(c, true) * 0.02, true);
-            Log.d("CONTOUR", "A: " + approx.total());
-            Log.d("CONTOUR", "ca: " + Imgproc.contourArea(contour));
+            Log.d("CONTOUR", "aprox: " + approx.total());
+            Log.d("CONTOUR", "contour area: " + Imgproc.contourArea(contour));
             if (approx.total() == 4 && Imgproc.contourArea(contour) > 150) {
                 // the contour has 4 points, it's valid
                 largest = approx;
