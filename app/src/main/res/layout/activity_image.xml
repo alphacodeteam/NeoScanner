@@ -84,32 +84,12 @@
             android:orientation="horizontal">
 
             <ImageButton
-                android:id="@+id/image_rotate_left"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                app:srcCompat="@android:drawable/ic_menu_rotate" />
-
-            <ImageButton
-                android:id="@+id/image_rotate_rigth"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                app:srcCompat="@android:drawable/ic_menu_rotate" />
-
-            <ImageButton
-                android:id="@+id/image_set_all"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                app:srcCompat="@android:drawable/ic_menu_rotate" />
-
-            <ImageButton
                 android:id="@+id/image_next_step"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                app:srcCompat="@android:drawable/ic_menu_rotate" />
+                app:srcCompat="@drawable/icon_pdf"
+                android:onClick="exportImageToPDF"/>
         </LinearLayout>
     </HorizontalScrollView>
 

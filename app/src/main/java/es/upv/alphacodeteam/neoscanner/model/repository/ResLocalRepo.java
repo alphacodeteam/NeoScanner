@@ -20,7 +20,7 @@ public class ResLocalRepo {
     /**
      * Descarga la imagen local, si no existe, devuelve null
      */
-    public static Bitmap getLocalProfileImage(final int id, final Activity activity) throws Exception {
+    public static Bitmap getLocalProfileImage(final String id, final Activity activity) throws Exception {
         // Obtenemos el fichero local
         File file = getLocalFile(id, activity);
         if (file != null) {
@@ -38,7 +38,7 @@ public class ResLocalRepo {
     /**
      * Creación de fichero
      */
-    public static File createLocalFile(final int id, final Activity activity) {
+    public static File createLocalFile(final String id, final Activity activity) {
         // String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date()); // Por si queremos añadirle un timeStamp al nombre del fichero
         // Ruta del fichero
         File storageDir = activity.getExternalFilesDir(Environment.DIRECTORY_PICTURES);
@@ -50,7 +50,7 @@ public class ResLocalRepo {
     /**
      * Si existe, devuelve el fichero local, sino, devuelve null
      */
-    public static File getLocalFile(final int id, final Activity activity) {
+    public static File getLocalFile(final String id, final Activity activity) {
         File storageDir = activity.getExternalFilesDir(Environment.DIRECTORY_PICTURES);
         String targetPath = storageDir.getAbsolutePath() + File.separator + id + ".jpg";
         File file = new File(targetPath);
@@ -63,7 +63,7 @@ public class ResLocalRepo {
     /**
      * Borrado del fichero especificado
      */
-    public static boolean deleteLocalFile(final int id, final Activity activity) {
+    public static boolean deleteLocalFile(final String id, final Activity activity) {
         // Si ya existe el fichero target, lo borramos (para subida de fotos fallidas)
         File file = getLocalFile(id, activity);
         if (file != null) {
@@ -76,7 +76,7 @@ public class ResLocalRepo {
     /**
      * Renombra un fichero local
      */
-    public static void renameLocalFile(final File file, final int id, final Activity activity) {
+    public static void renameLocalFile(final File file, final String id, final Activity activity) {
         File storageDir = activity.getExternalFilesDir(Environment.DIRECTORY_PICTURES);
         String strModifiedPath = storageDir.getAbsolutePath() + File.separator + id + ".jpg";
         // Renombramos el fichero con el path modificado (eliminamos el valor random)

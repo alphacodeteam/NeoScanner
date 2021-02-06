@@ -70,9 +70,7 @@ public class Image {
      */
     public static void startModeOfCamera(final Activity activity, File dir) {
         Intent cameraIntent = new Intent(android.provider.MediaStore.ACTION_IMAGE_CAPTURE);
-        Uri photoURI = FileProvider.getUriForFile(activity,
-                "com.example.android.fileprovider",
-                dir);
+        Uri photoURI = FileProvider.getUriForFile(activity, "com.example.android.fileprovider", dir);
         cameraIntent.putExtra(MediaStore.EXTRA_OUTPUT, photoURI);
         activity.startActivityForResult(cameraIntent, CAMERA_INTENT_CODE);
     }
@@ -418,7 +416,7 @@ Scalar color =new Scalar(Math.random()*255, Math.random()*255, Math.random()*255
      * @return bitmap
      * @throws Exception
      */
-    public static Bitmap compressBitmap(int width, int height, int quality, int id, Activity activity) throws Exception {
+    public static Bitmap compressBitmap(int width, int height, int quality, String id, Activity activity) throws Exception {
         File file = ResLocalRepo.getLocalFile(id, activity);
         Bitmap bitmap = ResLocalRepo.getBitmapFromFile(file);
         FileOutputStream out = new FileOutputStream(file);
