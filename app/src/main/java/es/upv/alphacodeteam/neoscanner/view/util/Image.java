@@ -5,8 +5,6 @@ import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.PointF;
 import android.net.Uri;
-import android.os.Bundle;
-import android.os.Environment;
 import android.provider.MediaStore;
 import android.util.Log;
 
@@ -24,7 +22,6 @@ import org.opencv.core.Size;
 import org.opencv.imgproc.Imgproc;
 
 import java.io.File;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -37,19 +34,19 @@ import es.upv.alphacodeteam.neoscanner.model.repository.ResLocalRepo;
 
 import static org.opencv.imgproc.Imgproc.CHAIN_APPROX_SIMPLE;
 import static org.opencv.imgproc.Imgproc.COLOR_BGR2GRAY;
-import static org.opencv.imgproc.Imgproc.RETR_CCOMP;
 import static org.opencv.imgproc.Imgproc.THRESH_BINARY;
-import static org.opencv.imgproc.Imgproc.boundingRect;
 import static org.opencv.imgproc.Imgproc.contourArea;
 import static org.opencv.imgproc.Imgproc.cvtColor;
 import static org.opencv.imgproc.Imgproc.drawContours;
 import static org.opencv.imgproc.Imgproc.findContours;
+import static org.opencv.imgproc.Imgproc.rectangle;
 import static org.opencv.imgproc.Imgproc.threshold;
 
 public class Image {
 
     public static final int CAMERA_INTENT_CODE = 0, GALLERY_INTENT_CODE = 1, RESULT_OK = -1;
     private static final int MAX_HEIGHT = 500;
+    private static final String TAG = "Image";
 
     /**
      * Inicio del modo de Galería
@@ -83,7 +80,7 @@ public class Image {
     /**
      * Modifica el tamaño de la imagen mediante el tamaño total.
      */
-    private static Bitmap getResizedBitmap(Bitmap bitmap, int maxHeight) {
+    public static Bitmap getResizedBitmap(Bitmap bitmap, int maxHeight) {
         double ratio = bitmap.getHeight() / (double) maxHeight;
         int width = (int) (bitmap.getWidth() / ratio);
         return Bitmap.createScaledBitmap(bitmap, width, maxHeight, false);
@@ -143,11 +140,77 @@ public class Image {
     /**
      * Global test
      */
-    public static Mat testGlobal(Mat src) {
+    public static List<PointF> testGlobal(Mat src) {
+        ArrayList<MatOfPoint> contours = new ArrayList<MatOfPoint>();
+        Log.d(TAG, "testGlobal: h - " + src.height() + "; w - " + src.width());
+        int heightOffset = src.height() / 600;
+        int widthOffset = src.width() / 502;
+        List<PointF> result = null;
+        Mat hierarchy = new Mat();
+        Mat mIntermediateMat = new Mat();
+        //Imgproc.GaussianBlur(src,mIntermediateMat,new Size(9,9),2,2);
+        //Imgproc.Canny(src, mIntermediateMat, 80, 100);
+
+        cvtColor( src, mIntermediateMat, COLOR_BGR2GRAY ); //Convert to gray
+        threshold( mIntermediateMat, mIntermediateMat, 125, 255, THRESH_BINARY ); //Threshold the gray
+        Imgproc.findContours(mIntermediateMat, contours, hierarchy, Imgproc.RETR_TREE, Imgproc.CHAIN_APPROX_SIMPLE, new Point(0, 0));
+/* Mat drawing = Mat.zeros( mIntermediateMat.size(), CvType.CV_8UC3 );
+ for( int i = 0; i< contours.size(); i++ )
+ {
+Scalar color =new Scalar(Math.random()*255, Math.random()*255, Math.random()*255);
+ Imgproc.drawContours( drawing, contours, i, color, 2, 8, hierarchy, 0, new Point() );
+ }*/
+        hierarchy.release();
+        // Imgproc.cvtColor(mIntermediateMat, mRgba, Imgproc.COLOR_GRAY2RGBA, 4)
+/* Mat drawing = Mat.zeros( mIntermediateMat.size(), CvType.CV_8UC3 );
+ for( int i = 0; i< contours.size(); i++ )
+ {
+Scalar color =new Scalar(Math.random()*255, Math.random()*255, Math.random()*255);
+ Imgproc.drawContours( drawing, contours, i, color, 2, 8, hierarchy, 0, new Point() );
+ }*/
+        Rect rect;
+        double largest_area = 0;
+        float offsetw1 = 120;
+        float offsetw2 = 380;
+        float offseth1 = 230;
+        float offseth2 = 645;
+        //float offsetw1 = 0;
+        //float offsetw2 = 0;
+        //float offseth1 = 0;
+        //float offseth2 = 0;
+        for ( int contourIdx=0; contourIdx < contours.size(); contourIdx++ )
+        {
+            // Minimum size allowed for consideration
+            MatOfPoint2f approxCurve = new MatOfPoint2f();
+            MatOfPoint2f contour2f = new MatOfPoint2f( contours.get(contourIdx).toArray() );
+            //Processing on mMOP2f1 which is in type MatOfPoint2f
+            double approxDistance = Imgproc.arcLength(contour2f, true)*0.02;
+            Imgproc.approxPolyDP(contour2f, approxCurve, approxDistance, true);
+
+            //Convert back to MatOfPoint
+            MatOfPoint points = new MatOfPoint( approxCurve.toArray() );
+
+            double area = contourArea(contours.get(contourIdx));  //  Find the area of contour
+
+            if( area > largest_area )
+            {
+                largest_area = area;// Get bounding rect of contour
+                rect = Imgproc.boundingRect(points);
+                // rectangle(src, new Point(rect.x, rect.y), new Point(rect.x + rect.width, rect.y + rect.height), new Scalar(255, 0, 0, 255), 3);
+                result = new ArrayList<>();
+                result.add(new PointF(Double.valueOf(rect.x + offsetw1).floatValue(), Double.valueOf(rect.y + offseth1).floatValue()));
+                result.add(new PointF(Double.valueOf(rect.x + offsetw1).floatValue(), Double.valueOf(rect.y + rect.height + offseth2).floatValue()));
+                result.add(new PointF(Double.valueOf(rect.x + rect.width + offsetw2).floatValue(), Double.valueOf(rect.y + rect.height + offseth2).floatValue()));
+                result.add(new PointF(Double.valueOf(rect.x + rect.width + offsetw2).floatValue(), Double.valueOf(rect.y + offseth1).floatValue()));
+            }
+
+        }
+        return result;
+        /*
         Mat result;
         double largest_area=0;
         int largest_contour_index=0;
-        Rect bounding_rect;
+        Rect bounding_rect = new Rect();
 
         Mat thr = new Mat();
         cvtColor( src, thr, COLOR_BGR2GRAY ); //Convert to gray
@@ -167,11 +230,23 @@ public class Image {
                 largest_contour_index = i;               //Store the index of largest contour
                 bounding_rect = boundingRect(contours.get(i)); // Find the bounding rectangle for biggest contour
             }
-            drawContours( thr, contours, i, new Scalar( 0, 255, 0 ), 4 ); // Draw the largest contour using previously stored index.
         }
+        drawContours(src, contours, -1, new Scalar(255,0,0), 3);
+
+        rectangle(src,new Point(bounding_rect.x, bounding_rect.y),new Point(bounding_rect.x+bounding_rect.height,bounding_rect.y+bounding_rect.width), new Scalar(0,255,0),2);
+        for (MatOfPoint c: contours) {
+            Log.d(TAG, "testGlobal: " + c.toArray().toString());
+        }
+        /*
+        c = max(contours, key = cv2.contourArea)
+        float x,y,w,h = boundingRect(c);
+
+        rectangle(src,(x,y),(x+w,y+h),(0,255,0),2)
 
 
-        return thr;
+        return src;
+
+         */
     }
 
     /**

@@ -30,6 +30,7 @@ import es.upv.alphacodeteam.neoscanner.view.util.QuadrilateralSelectionImageView
 
 public class ImageActivity extends AppCompatActivity {
 
+    private static final String TAG = "ImageActivity";
     private QuadrilateralSelectionImageView iv_image;
 
     private int mOriginReceived;
@@ -101,7 +102,7 @@ public class ImageActivity extends AppCompatActivity {
                     Mat temp = new Mat();
                     Utils.bitmapToMat(bitmapCompressed,temp);
                     //iv_image.setPoints(Image.findPoints(bitmapCompressed));
-                    iv_image.setImageBitmap(bitmapCompressed);
+                    iv_image.setImageBitmap(Image.getResizedBitmap(bitmapCompressed,800));
                     calculateActivity2(bitmapCompressed);
                     break;
             }
@@ -140,14 +141,14 @@ public class ImageActivity extends AppCompatActivity {
             Mat orig = new Mat();
             org.opencv.android.Utils.bitmapToMat(bitmap, orig);
             Log.d("TAG", "tagataag");
-
-            Mat transformed = Image.testGlobal(orig);
-            Utils.matToBitmap(transformed,bitmap);
-            Bitmap mResult = Image.applyThreshold(transformed);
             iv_image.setImageBitmap(bitmap);
+            iv_image.setPoints(Image.testGlobal(orig));
+
+            Log.d(TAG, "calculateActivity2: h - " + bitmap.getHeight() + "; w - " + bitmap.getWidth());
+
+            //iv_image.setPoints(Image.testGlobal(orig));
 
             orig.release();
-            transformed.release();
         }
     }
 
