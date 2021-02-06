@@ -343,7 +343,7 @@ public class Image {
      * @return bitmap
      * @throws Exception
      */
-    public static Bitmap compressBitmap(int width, int height, int quality, int id, Activity activity) throws Exception {
+    public static Bitmap compressBitmap(int width, int height, int quality, String id, Activity activity) throws Exception {
         File file = ResLocalRepo.getLocalFile(id, activity);
         Bitmap bitmap = ResLocalRepo.getBitmapFromFile(file);
         FileOutputStream out = new FileOutputStream(file);

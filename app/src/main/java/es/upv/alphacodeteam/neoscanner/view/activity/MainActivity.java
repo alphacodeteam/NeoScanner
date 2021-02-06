@@ -57,11 +57,11 @@ public class MainActivity extends AppCompatActivity implements Selectable {
         return super.onOptionsItemSelected(item);
     }
 
-
     // ******************************************************************************************************************************************************************************* //
     // ******************************************************************************** IMAGE ACQUISITION **************************************************************************** //
 
-    File dir= null;
+    File dir = null;
+
     /**
      * Selección del modo de adquisición de imagen (FLOATING ACTION BUTTON)
      */
@@ -72,12 +72,8 @@ public class MainActivity extends AppCompatActivity implements Selectable {
         builder.setItems(R.array.acquisition_type, (dialog, position) -> {
             switch (position) {
                 case 0:
-                    // AQUÍ ABRIR CÁMARA, UNA VEZ OBTENIDA LA FOTO, SE ABRIRÁ EN LA NUEVA ACTIVITY (ImageActivity) para su procesado
-                    //Intent i = new Intent(this, CameraActivity.class);
-                    //startActivity(i);
                     if (ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED) {
                         // You can use the API that requires the permission.
-
                         try {
                             dir = File.createTempFile("compressed-", ".jpg", getExternalFilesDir(Environment.DIRECTORY_PICTURES));
                         } catch (IOException e) {
@@ -90,7 +86,6 @@ public class MainActivity extends AppCompatActivity implements Selectable {
                     }
                     break;
                 case 1:
-                    // AQUÍ ABRIR EXPLORADOR DE ARCHIVOS (galeria), UNA VEZ SELECCIONADA LA FOTO, SE ABRIRÁ EN LA NUEVA ACTIVITY (ImageActivity) para su procesado
                     Image.startModeOfGallery(this);
                     break;
                 default:
@@ -115,10 +110,8 @@ public class MainActivity extends AppCompatActivity implements Selectable {
             int origin = -1;
             switch (requestCode) {
                 case Image.CAMERA_INTENT_CODE:
-                    imageSelected = FileProvider.getUriForFile(this,
-                            "com.example.android.fileprovider",
-                            dir);
-                    origin = Image.GALLERY_INTENT_CODE;
+                    imageSelected = FileProvider.getUriForFile(this, "com.example.android.fileprovider", dir);
+                    origin = Image.CAMERA_INTENT_CODE;
                     break;
                 case Image.GALLERY_INTENT_CODE:
                     imageSelected = data.getData();

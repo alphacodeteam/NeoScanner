@@ -1,9 +1,14 @@
 package es.upv.alphacodeteam.neoscanner.view.activity;
 
 import android.graphics.Bitmap;
+import android.graphics.Canvas;
+import android.graphics.Color;
+import android.graphics.Paint;
 import android.graphics.PointF;
+import android.graphics.pdf.PdfDocument;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Environment;
 import android.util.Log;
 import android.widget.ImageView;
 
@@ -14,6 +19,8 @@ import org.opencv.android.Utils;
 import org.opencv.core.Mat;
 
 import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -52,7 +59,6 @@ public class ImageActivity extends AppCompatActivity {
         // Recuperamos los datos recibidos de MainActivity
         mOriginReceived = (int) getIntent().getExtras().get("origin");
         if (mOriginReceived == Image.CAMERA_INTENT_CODE) {
-            // TODO: GUARDAR BITMAP RECIBIDO
             mBitmapReceived = (Bitmap) getIntent().getExtras().get("bitmap");
         } else if (mOriginReceived == Image.GALLERY_INTENT_CODE) {
             mUriReceived = (Uri) getIntent().getExtras().get("uri");
@@ -61,7 +67,6 @@ public class ImageActivity extends AppCompatActivity {
         setContentView(R.layout.activity_image);
         // Configuramos la vista
         configView();
-
     }
 
     /**
@@ -70,8 +75,6 @@ public class ImageActivity extends AppCompatActivity {
     private void configView() {
         // Vinculamos los componentes a la vista
         this.iv_image = findViewById(R.id.imageView);
-        // TODO: ME FALTA VINCULAR DEMÁS BOTONES
-
         // Aplicamos la imagen
         fillImageIntoImageView();
     }
@@ -80,16 +83,18 @@ public class ImageActivity extends AppCompatActivity {
      * Aplica en el imageView la imagen obtenida en el MainActivity
      */
     public void fillImageIntoImageView() {
-        int randNum = 0;
         try {
             switch (mOriginReceived) {
+                case Image.CAMERA_INTENT_CODE:
+                    iv_image.setImageBitmap(mBitmapReceived);
+                    break;
                 case Image.GALLERY_INTENT_CODE:
                     // Ubicación de la foto tomada desde galeria
                     InputStream originPath = this.getContentResolver().openInputStream(mUriReceived);
                     // Generate rand number
                     int min = 0, max = 10000;
-                    randNum = ThreadLocalRandom.current().nextInt(min, max + 1);
-                    Log.d("Random Num--> ", "" + randNum);
+                    String randNum = ThreadLocalRandom.current().nextInt(min, max + 1) + "";
+                    Log.d("Random Num--> ", randNum);
                     // Path destino
                     File targetFile = ResLocalRepo.createLocalFile(randNum, this);
                     Path targetPath = Paths.get(targetFile.getPath());
@@ -99,7 +104,7 @@ public class ImageActivity extends AppCompatActivity {
                     Bitmap bitmapCompressed = Image.compressBitmap(75, 75, 40, randNum, this);
                     // Por último, la añadimos al image view
                     Mat temp = new Mat();
-                    Utils.bitmapToMat(bitmapCompressed,temp);
+                    Utils.bitmapToMat(bitmapCompressed, temp);
                     //iv_image.setPoints(Image.findPoints(bitmapCompressed));
                     iv_image.setImageBitmap(bitmapCompressed);
                     calculateActivity2(bitmapCompressed);
@@ -142,13 +147,53 @@ public class ImageActivity extends AppCompatActivity {
             Log.d("TAG", "tagataag");
 
             Mat transformed = Image.testGlobal(orig);
-            Utils.matToBitmap(transformed,bitmap);
+            Utils.matToBitmap(transformed, bitmap);
             Bitmap mResult = Image.applyThreshold(transformed);
             iv_image.setImageBitmap(bitmap);
 
             orig.release();
             transformed.release();
         }
+    }
+
+    public boolean exportImageToPDF(Bitmap bitmap) {
+
+        PdfDocument pdf = new PdfDocument();
+        PdfDocument.PageInfo pi = new PdfDocument.PageInfo.Builder(bitmap.getWidth(), bitmap.getHeight(), 1).create();
+
+        PdfDocument.Page page = pdf.startPage(pi);
+
+        Canvas canvas = page.getCanvas();
+        Paint paint = new Paint();
+        paint.setColor(Color.parseColor("#FFFFFF"));
+
+        canvas.drawPaint(paint);
+
+        bitmap = Bitmap.createScaledBitmap(bitmap, bitmap.getWidth(), bitmap.getHeight(), true);
+        paint.setColor(Color.BLUE);
+        canvas.drawBitmap(bitmap, 0, 0, null);
+
+        pdf.finishPage(page);
+
+        // Save the bitmap
+        File root = new File(Environment.getExternalStorageDirectory(), "NeoScannerPDF");
+        if (!root.exists()) {
+            root.mkdir();
+        }
+
+        // Generate rand number
+        int min = 0, max = 10000;
+        String randNum = ThreadLocalRandom.current().nextInt(min, max + 1) + "";
+        File file = new File(root, randNum + ".pdf");
+
+        try {
+            FileOutputStream fos = new FileOutputStream(file);
+            pdf.writeTo(fos);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        return true;
     }
 
 }
