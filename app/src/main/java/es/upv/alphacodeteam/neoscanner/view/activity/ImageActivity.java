@@ -9,6 +9,8 @@ import android.widget.ImageView;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import org.opencv.android.OpenCVLoader;
+import org.opencv.android.Utils;
 import org.opencv.core.Mat;
 
 import java.io.File;
@@ -28,18 +30,20 @@ import es.upv.alphacodeteam.neoscanner.view.util.QuadrilateralSelectionImageView
 
 public class ImageActivity extends AppCompatActivity {
 
-    private ImageView iv_image;
+    private QuadrilateralSelectionImageView iv_image;
 
     private int mOriginReceived;
     // From Camera
     private Bitmap mBitmapReceived;
-    private QuadrilateralSelectionImageView noSeComoLlamarme;
     // From Gallery
     private Uri mUriReceived;
 
-    // TODO: MARC
-    // TODO: En el onCreate() obtengo la uri, lo mismo con el bitmap. mOriginReceived la podemos usar para diferenciar cuál guardar
-    // TODO: Utilizo el método de viewConfig() para vincular componentes xml y para setear la foto extraída en el imageView, puedes llamar aquí a métodos de cálculos para el bitmap ej. calculateActivity()
+    //Carga el OpenCV
+    static {
+        if (!OpenCVLoader.initDebug()) {
+            // Handle initialization error
+        }
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -49,7 +53,7 @@ public class ImageActivity extends AppCompatActivity {
         mOriginReceived = (int) getIntent().getExtras().get("origin");
         if (mOriginReceived == Image.CAMERA_INTENT_CODE) {
             // TODO: GUARDAR BITMAP RECIBIDO
-            // mBitmapReceived = (Bitmap) getIntent()...
+            mBitmapReceived = (Bitmap) getIntent().getExtras().get("bitmap");
         } else if (mOriginReceived == Image.GALLERY_INTENT_CODE) {
             mUriReceived = (Uri) getIntent().getExtras().get("uri");
         }
@@ -79,9 +83,6 @@ public class ImageActivity extends AppCompatActivity {
         int randNum = 0;
         try {
             switch (mOriginReceived) {
-                case Image.CAMERA_INTENT_CODE:
-                    // Habrá que obtener el bitmap procesado y llamarlo con rand number también
-                    break;
                 case Image.GALLERY_INTENT_CODE:
                     // Ubicación de la foto tomada desde galeria
                     InputStream originPath = this.getContentResolver().openInputStream(mUriReceived);
@@ -94,14 +95,19 @@ public class ImageActivity extends AppCompatActivity {
                     Path targetPath = Paths.get(targetFile.getPath());
                     // Copiamos el fichero resultante en nuestra carpeta local
                     Files.copy(originPath, targetPath, StandardCopyOption.REPLACE_EXISTING);
+                    // Comprimimos la imagen local //TODO: Esto habrá que cambiarlo y obtener la foto sin compresión
+                    Bitmap bitmapCompressed = Image.compressBitmap(75, 75, 40, randNum, this);
+                    // Por último, la añadimos al image view
+                    Mat temp = new Mat();
+                    Utils.bitmapToMat(bitmapCompressed,temp);
+                    //iv_image.setPoints(Image.findPoints(bitmapCompressed));
+                    iv_image.setImageBitmap(bitmapCompressed);
+                    calculateActivity2(bitmapCompressed);
                     break;
             }
-            // Comprimimos la imagen local //TODO: Esto habrá que cambiarlo y obtener la foto sin compresión
-            Bitmap bitmapCompressed = Image.compressBitmap(75, 75, 40, randNum, this);
-            // Por último, la añadimos al image view
-            iv_image.setImageBitmap(bitmapCompressed);
         } catch (Exception ex) {
             MyToast.showLongMessage(this.getResources().getString(R.string.title_error_occurred), this);
+            Log.e("IMAGEACTIVITY", "fillImageIntoImageView: " + ex.getMessage());
         }
     }
 
@@ -109,7 +115,7 @@ public class ImageActivity extends AppCompatActivity {
      *
      */
     private void calculateActivity() {
-        List<PointF> points = noSeComoLlamarme.getPoints();
+        List<PointF> points = iv_image.getPoints();
 
         if (mBitmapReceived != null) {
             Mat orig = new Mat();
@@ -118,7 +124,27 @@ public class ImageActivity extends AppCompatActivity {
             Mat transformed = Image.perspectiveTransform(orig, points);
 
             Bitmap mResult = Image.applyThreshold(transformed);
-            noSeComoLlamarme.setImageBitmap(mResult);
+            iv_image.setImageBitmap(mResult);
+
+            orig.release();
+            transformed.release();
+        }
+    }
+
+    /**
+     *
+     */
+    private void calculateActivity2(Bitmap bitmap) {
+        if (bitmap != null) {
+            Log.d("TAG", "tagatag");
+            Mat orig = new Mat();
+            org.opencv.android.Utils.bitmapToMat(bitmap, orig);
+            Log.d("TAG", "tagataag");
+
+            Mat transformed = Image.testGlobal(orig);
+            Utils.matToBitmap(transformed,bitmap);
+            Bitmap mResult = Image.applyThreshold(transformed);
+            iv_image.setImageBitmap(bitmap);
 
             orig.release();
             transformed.release();
