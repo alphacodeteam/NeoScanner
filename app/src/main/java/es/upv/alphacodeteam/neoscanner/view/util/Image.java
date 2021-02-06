@@ -18,6 +18,8 @@ import org.opencv.core.Mat;
 import org.opencv.core.MatOfPoint;
 import org.opencv.core.MatOfPoint2f;
 import org.opencv.core.Point;
+import org.opencv.core.Rect;
+import org.opencv.core.Scalar;
 import org.opencv.core.Size;
 import org.opencv.imgproc.Imgproc;
 
@@ -32,6 +34,17 @@ import java.util.List;
 import java.io.FileOutputStream;
 
 import es.upv.alphacodeteam.neoscanner.model.repository.ResLocalRepo;
+
+import static org.opencv.imgproc.Imgproc.CHAIN_APPROX_SIMPLE;
+import static org.opencv.imgproc.Imgproc.COLOR_BGR2GRAY;
+import static org.opencv.imgproc.Imgproc.RETR_CCOMP;
+import static org.opencv.imgproc.Imgproc.THRESH_BINARY;
+import static org.opencv.imgproc.Imgproc.boundingRect;
+import static org.opencv.imgproc.Imgproc.contourArea;
+import static org.opencv.imgproc.Imgproc.cvtColor;
+import static org.opencv.imgproc.Imgproc.drawContours;
+import static org.opencv.imgproc.Imgproc.findContours;
+import static org.opencv.imgproc.Imgproc.threshold;
 
 public class Image {
 
@@ -128,11 +141,45 @@ public class Image {
     }
 
     /**
+     * Global test
+     */
+    public static Mat testGlobal(Mat src) {
+        Mat result;
+        double largest_area=0;
+        int largest_contour_index=0;
+        Rect bounding_rect;
+
+        Mat thr = new Mat();
+        cvtColor( src, thr, COLOR_BGR2GRAY ); //Convert to gray
+        threshold( thr, thr, 125, 255, THRESH_BINARY ); //Threshold the gray
+
+        List<MatOfPoint> contours = new ArrayList<>();
+
+        findContours( thr, contours, new Mat(), RETR_CCOMP, CHAIN_APPROX_SIMPLE ); // Find the contours in the image
+
+        for( int i = 0; i< contours.size(); i++ ) // iterate through each contour.
+        {
+            double area = contourArea(contours.get(i));  //  Find the area of contour
+
+            if( area > largest_area )
+            {
+                largest_area = area;
+                largest_contour_index = i;               //Store the index of largest contour
+                bounding_rect = boundingRect(contours.get(i)); // Find the bounding rectangle for biggest contour
+            }
+            drawContours( thr, contours, i, new Scalar( 0, 255, 0 ), 4 ); // Draw the largest contour using previously stored index.
+        }
+
+
+        return thr;
+    }
+
+    /**
      * Detecta los bordes.
      */
     public static Mat edgeDetection(Mat src) {
         Mat edges = new Mat();
-        Imgproc.cvtColor(src, edges, Imgproc.COLOR_BGR2GRAY);
+        cvtColor(src, edges, COLOR_BGR2GRAY);
         Imgproc.GaussianBlur(edges, edges, new Size(5, 5), 0);
         Imgproc.Canny(edges, edges, 75, 200);
         return edges;
@@ -143,13 +190,13 @@ public class Image {
      */
     private static MatOfPoint2f findLargestContour(Mat src) {
         List<MatOfPoint> contours = new ArrayList<>();
-        Imgproc.findContours(src, contours, new Mat(), Imgproc.RETR_LIST, Imgproc.CHAIN_APPROX_SIMPLE);
+        findContours(src, contours, new Mat(), Imgproc.RETR_LIST, CHAIN_APPROX_SIMPLE);
 
         // Get the 5 largest contours
         Collections.sort(contours, new Comparator<MatOfPoint>() {
             public int compare(MatOfPoint o1, MatOfPoint o2) {
-                double area1 = Imgproc.contourArea(o1);
-                double area2 = Imgproc.contourArea(o2);
+                double area1 = contourArea(o1);
+                double area2 = contourArea(o2);
                 return (int) (area2 - area1);
             }
         });
@@ -167,8 +214,8 @@ public class Image {
             Log.d("CONTOUR", "C = " + c.total());
             Imgproc.approxPolyDP(c, approx, Imgproc.arcLength(c, true) * 0.02, true);
             Log.d("CONTOUR", "aprox: " + approx.total());
-            Log.d("CONTOUR", "contour area: " + Imgproc.contourArea(contour));
-            if (approx.total() == 4 && Imgproc.contourArea(contour) > 150) {
+            Log.d("CONTOUR", "contour area: " + contourArea(contour));
+            if (approx.total() == 4 && contourArea(contour) > 150) {
                 // the contour has 4 points, it's valid
                 largest = approx;
                 Log.d("CONTOUR", "premio");
@@ -196,14 +243,14 @@ public class Image {
      * Aplica el Threshold para dar la sensación de escaneado...
      */
     public static Bitmap applyThreshold(Mat src) {
-        Imgproc.cvtColor(src, src, Imgproc.COLOR_BGR2GRAY);
+        cvtColor(src, src, COLOR_BGR2GRAY);
 
         // Some other approaches
         // Imgproc.adaptiveThreshold(src, src, 255, Imgproc.ADAPTIVE_THRESH_MEAN_C, Imgproc.THRESH_BINARY, 15, 15);
         // Imgproc.threshold(src, src, 0, 255, Imgproc.THRESH_BINARY + Imgproc.THRESH_OTSU);
 
         Imgproc.GaussianBlur(src, src, new Size(5, 5), 0);
-        Imgproc.adaptiveThreshold(src, src, 255, Imgproc.ADAPTIVE_THRESH_GAUSSIAN_C, Imgproc.THRESH_BINARY, 11, 2);
+        Imgproc.adaptiveThreshold(src, src, 255, Imgproc.ADAPTIVE_THRESH_GAUSSIAN_C, THRESH_BINARY, 11, 2);
 
         Bitmap bm = Bitmap.createBitmap(src.width(), src.height(), Bitmap.Config.ARGB_8888);
         org.opencv.android.Utils.matToBitmap(src, bm);

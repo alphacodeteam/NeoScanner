@@ -83,10 +83,6 @@ public class ImageActivity extends AppCompatActivity {
         int randNum = 0;
         try {
             switch (mOriginReceived) {
-                case Image.CAMERA_INTENT_CODE:
-                    // Habrá que obtener el bitmap procesado y llamarlo con rand number también
-                    iv_image.setImageBitmap(mBitmapReceived);
-                    break;
                 case Image.GALLERY_INTENT_CODE:
                     // Ubicación de la foto tomada desde galeria
                     InputStream originPath = this.getContentResolver().openInputStream(mUriReceived);
@@ -104,13 +100,14 @@ public class ImageActivity extends AppCompatActivity {
                     // Por último, la añadimos al image view
                     Mat temp = new Mat();
                     Utils.bitmapToMat(bitmapCompressed,temp);
-                    iv_image.setPoints(Image.findPoints(bitmapCompressed));
+                    //iv_image.setPoints(Image.findPoints(bitmapCompressed));
                     iv_image.setImageBitmap(bitmapCompressed);
+                    calculateActivity2(bitmapCompressed);
                     break;
             }
-            calculateActivity();
         } catch (Exception ex) {
             MyToast.showLongMessage(this.getResources().getString(R.string.title_error_occurred), this);
+            Log.e("IMAGEACTIVITY", "fillImageIntoImageView: " + ex.getMessage());
         }
     }
 
@@ -128,6 +125,26 @@ public class ImageActivity extends AppCompatActivity {
 
             Bitmap mResult = Image.applyThreshold(transformed);
             iv_image.setImageBitmap(mResult);
+
+            orig.release();
+            transformed.release();
+        }
+    }
+
+    /**
+     *
+     */
+    private void calculateActivity2(Bitmap bitmap) {
+        if (bitmap != null) {
+            Log.d("TAG", "tagatag");
+            Mat orig = new Mat();
+            org.opencv.android.Utils.bitmapToMat(bitmap, orig);
+            Log.d("TAG", "tagataag");
+
+            Mat transformed = Image.testGlobal(orig);
+            Utils.matToBitmap(transformed,bitmap);
+            Bitmap mResult = Image.applyThreshold(transformed);
+            iv_image.setImageBitmap(bitmap);
 
             orig.release();
             transformed.release();
