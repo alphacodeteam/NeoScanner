@@ -174,12 +174,15 @@ public class ScanActivity extends AppCompatActivity {
                         }
 
                         scanButton.setText("Escanear imagen");
+                    }else{
+                        scanButton.setText("Escanear imagen");
                     }
+
                     scanButton.setOnClickListener(new View.OnClickListener() {
                         @Override
                         public void onClick(View v) {
                             progressDialog = new ProgressDialog(ScanActivity.this);
-                            progressDialog.setMessage("Scanning...");
+                            progressDialog.setMessage("Escaneando...");
                             progressDialog.setCancelable(false);
                             progressDialog.show();
                             new ScanImageTask().execute();
