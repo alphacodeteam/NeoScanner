@@ -376,19 +376,19 @@ public class ScanActivity extends AppCompatActivity {
         OutputStream fos;
         Intent intent = new Intent(Intent.ACTION_VIEW);
 
+        String imagesDir = Environment.getExternalStoragePublicDirectory(
+                Environment.DIRECTORY_DOCUMENTS).toString() + File.separator + "NeoScanner";
         try {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
                 ContentResolver resolver = getContentResolver();
                 ContentValues contentValues = new ContentValues();
-                contentValues.put(MediaStore.MediaColumns.DISPLAY_NAME, "name");
+                contentValues.put(MediaStore.MediaColumns.DISPLAY_NAME, "Scan-"+randNum);
                 contentValues.put(MediaStore.MediaColumns.MIME_TYPE, "application/pdf");
                 contentValues.put(MediaStore.MediaColumns.RELATIVE_PATH, "Documents/NeoScanner");
-                Uri imageUri = resolver.insert(MediaStore.Files.getContentUri("external"), contentValues);
+                Uri imageUri = resolver.insert(Uri.parse("file:///storage/emulated/0/Documents/NeoScanner/"), contentValues);
                 fos = resolver.openOutputStream(imageUri);
                 pdfUri = imageUri;
             } else {
-                String imagesDir = Environment.getExternalStoragePublicDirectory(
-                        Environment.DIRECTORY_DOCUMENTS).toString() + File.separator + "NeoScanner";
 
                 File file = new File(imagesDir);
 
