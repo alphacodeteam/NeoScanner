@@ -218,11 +218,11 @@ public class ScanActivity extends AppCompatActivity {
                     public void onClick(View v) {
                         Uri pdfUri = exportImageToPDF(bitmap);
                         Intent intent = new Intent(Intent.ACTION_VIEW);
-                        Uri data = FileProvider.getUriForFile(getApplicationContext(), BuildConfig.APPLICATION_ID +".provider",new File(pdfUri.toString()));
-                        intent.setDataAndType(data, "application/pdf");
+                        intent.setDataAndType(pdfUri, "application/pdf");
                         intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
                         intent.setFlags(Intent.FLAG_ACTIVITY_NO_HISTORY);
                         startActivity(intent);
+
                     }
                 });
                 cancelButton.setOnClickListener(new View.OnClickListener() {
@@ -383,7 +383,7 @@ public class ScanActivity extends AppCompatActivity {
                 contentValues.put(MediaStore.MediaColumns.DISPLAY_NAME, "name");
                 contentValues.put(MediaStore.MediaColumns.MIME_TYPE, "application/pdf");
                 contentValues.put(MediaStore.MediaColumns.RELATIVE_PATH, "Documents/NeoScanner");
-                Uri imageUri = resolver.insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, contentValues);
+                Uri imageUri = resolver.insert(MediaStore.Files.getContentUri("external"), contentValues);
                 fos = resolver.openOutputStream(imageUri);
                 pdfUri = imageUri;
             } else {
