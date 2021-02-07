@@ -9,6 +9,8 @@ import android.os.Bundle;
 import android.os.Environment;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.Button;
+import android.widget.ImageButton;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
@@ -22,6 +24,7 @@ import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import java.io.File;
 import java.io.IOException;
 
+import es.upv.alphacodeteam.neoscanner.BuildConfig;
 import es.upv.alphacodeteam.neoscanner.R;
 import es.upv.alphacodeteam.neoscanner.view.util.Image;
 import es.upv.alphacodeteam.neoscanner.view.util.Selectable;
@@ -38,7 +41,7 @@ public class MainActivity extends AppCompatActivity implements Selectable {
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-        FloatingActionButton fab = findViewById(R.id.fab);
+        ImageButton fab = findViewById(R.id.fab);
         fab.setOnClickListener(view -> this.selectAcquisitionType());
     }
 
@@ -110,8 +113,8 @@ public class MainActivity extends AppCompatActivity implements Selectable {
             int origin = -1;
             switch (requestCode) {
                 case Image.CAMERA_INTENT_CODE:
-                    imageSelected = FileProvider.getUriForFile(this, "com.example.android.fileprovider", dir);
-                    origin = Image.CAMERA_INTENT_CODE;
+                    imageSelected = FileProvider.getUriForFile(this, BuildConfig.APPLICATION_ID +".provider", dir);
+                    origin = Image.GALLERY_INTENT_CODE;
                     break;
                 case Image.GALLERY_INTENT_CODE:
                     imageSelected = data.getData();
@@ -119,7 +122,7 @@ public class MainActivity extends AppCompatActivity implements Selectable {
                     break;
             }
             if (origin != -1) {
-                Intent intent = new Intent(MainActivity.this, ImageActivity.class);
+                Intent intent = new Intent(MainActivity.this, ScanActivity.class);
                 intent.putExtra("origin", origin);
                 if (imageSelected != null) {
                     // Llamamos al ImageActivity
