@@ -538,22 +538,22 @@ public class ScanActivity extends AppCompatActivity {
         try {
             List<PointF> result = null;
             Mat image = new Mat();
-            Mat orig = new Mat();
+            Mat src = new Mat();
             org.opencv.android.Utils.bitmapToMat(getResizedBitmap(bmp, MAX_HEIGHT), image);
-            org.opencv.android.Utils.bitmapToMat(bmp, orig);
+            org.opencv.android.Utils.bitmapToMat(bmp, src);
 
             Mat edges = edgeDetection(image);
-            MatOfPoint2f largest = findLargestContour(edges);
+            MatOfPoint2f largestContour = findLargestContour(edges);
 
-            if (largest != null) {
+            if (largestContour != null) {
                 Log.d(TAG, "deuria");
-                Point[] points = sortPoints(largest.toArray());
+                Point[] points = sortPoints(largestContour.toArray());
                 result = new ArrayList<>();
                 result.add(new PointF(Double.valueOf(points[0].x).floatValue(), Double.valueOf(points[0].y).floatValue()));
                 result.add(new PointF(Double.valueOf(points[1].x).floatValue(), Double.valueOf(points[1].y).floatValue()));
                 result.add(new PointF(Double.valueOf(points[2].x).floatValue(), Double.valueOf(points[2].y).floatValue()));
                 result.add(new PointF(Double.valueOf(points[3].x).floatValue(), Double.valueOf(points[3].y).floatValue()));
-                largest.release();
+                largestContour.release();
             } else {
                 Log.d(TAG, "no deuria");
                // result = testGlobal();
@@ -561,13 +561,14 @@ public class ScanActivity extends AppCompatActivity {
 
             edges.release();
             image.release();
-            orig.release();
+            src.release();
             return result;
         } catch (Exception e) {
             //Crashlytics.logException(e);
             return null;
         }
     }
+
     /**
      * Detecta los bordes.
      */
@@ -588,7 +589,6 @@ public class ScanActivity extends AppCompatActivity {
 
         // Get the 5 largest contours
         try {
-
             Collections.sort(contours, new Comparator<MatOfPoint>() {
                 public int compare(MatOfPoint o1, MatOfPoint o2) {
                     double area1 = Imgproc.contourArea(o1);
@@ -599,15 +599,15 @@ public class ScanActivity extends AppCompatActivity {
         } catch (IllegalArgumentException e) {
             return null;
         }
+
         if (contours.size() > 5) contours.subList(4, contours.size() - 1).clear();
 
         MatOfPoint2f largest = null;
         for (MatOfPoint contour : contours) {
+            MatOfPoint2f temp = new MatOfPoint2f();
             MatOfPoint2f approx = new MatOfPoint2f();
-            MatOfPoint2f c = new MatOfPoint2f();
-            contour.convertTo(c, CvType.CV_32FC2);
-            Imgproc.approxPolyDP(c, approx, Imgproc.arcLength(c, true) * 0.02, true);
-
+            contour.convertTo(temp, CvType.CV_32FC2);
+            Imgproc.approxPolyDP(temp, approx, Imgproc.arcLength(temp, true) * 0.02, true);
             if (approx.total() == 4 && Imgproc.contourArea(contour) > 150) {
                 // the contour has 4 points, it's valid
                 largest = approx;
