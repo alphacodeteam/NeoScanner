@@ -91,8 +91,6 @@ public class ScanActivity extends AppCompatActivity {
     RelativeLayout mainLayout;
     RelativeLayout afterScanLayout;
 
-    private int mOriginReceived;
-    private Bitmap mBitmapReceived;
     private Uri mUriReceived;
 
     static {
@@ -141,7 +139,7 @@ public class ScanActivity extends AppCompatActivity {
             Path targetPath = Paths.get(targetFile.getPath());
             // Copiamos el fichero resultante en nuestra carpeta local
             Files.copy(originPath, targetPath, StandardCopyOption.REPLACE_EXISTING);
-            // Comprimimos la imagen local //TODO: Esto habrá que cambiarlo y obtener la foto sin compresión
+            // Comprimimos la imagen local
             Bitmap bitmapCompressed = compressBitmap(75, 75, 40, randNum, this);
             bmp = bitmapCompressed;
 
@@ -267,7 +265,7 @@ public class ScanActivity extends AppCompatActivity {
         }
     }
 
-    void saveImage(Bitmap bmp) {   boolean saved;
+    /*void saveImage(Bitmap bmp) {   boolean saved;
         OutputStream fos;
 
         try {
@@ -301,7 +299,7 @@ public class ScanActivity extends AppCompatActivity {
             e.printStackTrace();
         }
 
-    }
+    }*/
 
     //@AddTrace(name = "load_bitmap")
     Bitmap getBitmap(String mCurrentPhotoPath) {
@@ -512,7 +510,7 @@ public class ScanActivity extends AppCompatActivity {
         for (MatOfPoint c: contours) {
             Log.d(TAG, "testGlobal: " + c.toArray().toString());
         }
-        /*
+
         c = max(contours, key = cv2.contourArea)
         float x,y,w,h = boundingRect(c);
         rectangle(src,(x,y),(x+w,y+h),(0,255,0),2)
