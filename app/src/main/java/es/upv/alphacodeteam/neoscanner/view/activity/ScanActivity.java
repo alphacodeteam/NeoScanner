@@ -27,6 +27,7 @@ import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
+import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
@@ -215,11 +216,14 @@ public class ScanActivity extends AppCompatActivity {
                     @Override
                     public void onClick(View v) {
                         Uri pdfUri = exportImageToPDF(bitmap);
+                        /*
                         Intent intent = new Intent(Intent.ACTION_VIEW);
                         intent.setDataAndType(pdfUri, "application/pdf");
                         intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
                         intent.setFlags(Intent.FLAG_ACTIVITY_NO_HISTORY);
                         startActivity(intent);
+                         */
+                        Toast.makeText(getApplicationContext(),"PDF guardado en " + pdfUri, Toast.LENGTH_SHORT).show();
 
                     }
                 });
@@ -378,14 +382,15 @@ public class ScanActivity extends AppCompatActivity {
                 Environment.DIRECTORY_DOCUMENTS).toString() + File.separator + "NeoScanner";
         try {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-                ContentResolver resolver = getContentResolver();
+                ContentResolver resolver = this.getContentResolver();
                 ContentValues contentValues = new ContentValues();
-                contentValues.put(MediaStore.MediaColumns.DISPLAY_NAME, "Scan-"+randNum);
+                contentValues.put(MediaStore.MediaColumns.DISPLAY_NAME, "Scan-"+randNum + ".pdf");
                 contentValues.put(MediaStore.MediaColumns.MIME_TYPE, "application/pdf");
-                contentValues.put(MediaStore.MediaColumns.RELATIVE_PATH, "Documents/NeoScanner");
-                Uri imageUri = resolver.insert(Uri.parse("file:///storage/emulated/0/Documents/NeoScanner/"), contentValues);
-                fos = resolver.openOutputStream(imageUri);
-                pdfUri = imageUri;
+                contentValues.put(MediaStore.MediaColumns.RELATIVE_PATH, Environment.DIRECTORY_DOWNLOADS);
+                Uri uri = resolver.insert(MediaStore.Downloads.EXTERNAL_CONTENT_URI, contentValues);
+
+                fos = resolver.openOutputStream(uri);
+                pdfUri = uri;
             } else {
 
                 File file = new File(imagesDir);
@@ -406,7 +411,7 @@ public class ScanActivity extends AppCompatActivity {
         } catch (IOException e) {
             e.printStackTrace();
         }
-
+        Log.d(TAG, "exportImageToPDF: " + pdfUri);
         return pdfUri;
     }
 
