@@ -419,7 +419,7 @@ public class ScanActivity extends AppCompatActivity {
     /**
      * Global test
      */
-    private List<PointF> testGlobal() {
+    private List<PointF> secondAlgorithm() {
         Mat src = new Mat();
         Utils.bitmapToMat(bmp, src);
         ArrayList<MatOfPoint> contours = new ArrayList<MatOfPoint>();
@@ -435,20 +435,7 @@ public class ScanActivity extends AppCompatActivity {
         cvtColor( src, mIntermediateMat, COLOR_BGR2GRAY ); //Convert to gray
         threshold( mIntermediateMat, mIntermediateMat, 125, 255, THRESH_BINARY ); //Threshold the gray
         Imgproc.findContours(mIntermediateMat, contours, hierarchy, Imgproc.RETR_TREE, Imgproc.CHAIN_APPROX_SIMPLE, new Point(0, 0));
-        /* Mat drawing = Mat.zeros( mIntermediateMat.size(), CvType.CV_8UC3 );
-         for( int i = 0; i< contours.size(); i++ )
-         {
-        Scalar color =new Scalar(Math.random()*255, Math.random()*255, Math.random()*255);
-         Imgproc.drawContours( drawing, contours, i, color, 2, 8, hierarchy, 0, new Point() );
-         }*/
-        hierarchy.release();
-        // Imgproc.cvtColor(mIntermediateMat, mRgba, Imgproc.COLOR_GRAY2RGBA, 4)
-        /* Mat drawing = Mat.zeros( mIntermediateMat.size(), CvType.CV_8UC3 );
-         for( int i = 0; i< contours.size(); i++ )
-         {
-        Scalar color =new Scalar(Math.random()*255, Math.random()*255, Math.random()*255);
-         Imgproc.drawContours( drawing, contours, i, color, 2, 8, hierarchy, 0, new Point() );
-         }*/
+
         Rect rect;
         double largest_area = 0;
         //float offsetw1 = 120;
@@ -487,37 +474,6 @@ public class ScanActivity extends AppCompatActivity {
 
         }
         return result;
-        /*
-        Mat result;
-        double largest_area=0;
-        int largest_contour_index=0;
-        Rect bounding_rect = new Rect();
-        Mat thr = new Mat();
-        cvtColor( src, thr, COLOR_BGR2GRAY ); //Convert to gray
-        threshold( thr, thr, 125, 255, THRESH_BINARY ); //Threshold the gray
-        List<MatOfPoint> contours = new ArrayList<>();
-        findContours( thr, contours, new Mat(), RETR_CCOMP, CHAIN_APPROX_SIMPLE ); // Find the contours in the image
-        for( int i = 0; i< contours.size(); i++ ) // iterate through each contour.
-        {
-            double area = contourArea(contours.get(i));  //  Find the area of contour
-            if( area > largest_area )
-            {
-                largest_area = area;
-                largest_contour_index = i;               //Store the index of largest contour
-                bounding_rect = boundingRect(contours.get(i)); // Find the bounding rectangle for biggest contour
-            }
-        }
-        drawContours(src, contours, -1, new Scalar(255,0,0), 3);
-        rectangle(src,new Point(bounding_rect.x, bounding_rect.y),new Point(bounding_rect.x+bounding_rect.height,bounding_rect.y+bounding_rect.width), new Scalar(0,255,0),2);
-        for (MatOfPoint c: contours) {
-            Log.d(TAG, "testGlobal: " + c.toArray().toString());
-        }
-        /*
-        c = max(contours, key = cv2.contourArea)
-        float x,y,w,h = boundingRect(c);
-        rectangle(src,(x,y),(x+w,y+h),(0,255,0),2)
-        return src;
-         */
     }
 
 
@@ -556,7 +512,7 @@ public class ScanActivity extends AppCompatActivity {
                 largestContour.release();
             } else {
                 Log.d(TAG, "no deuria");
-               // result = testGlobal();
+               // result = secondAlgorithm(); //possible improvement
             }
 
             edges.release();
